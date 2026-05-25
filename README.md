@@ -52,6 +52,7 @@ PandaClean/
 │   ├── theme.py
 │   └── tool_base.py
 │
+├── .gitignore
 ├── README.md
 └── requirements.txt
 ```
