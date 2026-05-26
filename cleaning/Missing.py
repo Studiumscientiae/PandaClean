@@ -54,7 +54,7 @@ def fill_missing_numeric_with_mean(df):
 def fill_missing_numeric_with_median(df):
     # missing numerical values are being replace by median value
 
-    numeric_df= df.select_dtypes(inlude=["number"]).colunms
+    numeric_df= df.select_dtypes(include=["number"]).columns
 
     for column in numeric_df:
         median_value= df[column].median()
