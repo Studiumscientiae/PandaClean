@@ -122,9 +122,7 @@ python gui/main.py
 - Add visualization support.
 - Add machine learning preprocessing.
 - Support more file formats.
-<<<<<<< HEAD
 - Using OOPs replacing procedural programming.
-=======
 - Refactor the project using Object-Oriented Programming (OOP).
 
 ## LICENSE
@@ -153,4 +151,4 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
->>>>>>> 96f0fa9 (Complete testing for data cleaning and file handling modules)
+
