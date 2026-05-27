@@ -67,8 +67,6 @@ PandaClean/
 │   ├── theme.py
 │   └── tool_base.py
 │
-<<<<<<< HEAD
-=======
 ├── tests/
 │   ├── data/
 │   │       └── sample_dataset.xlsx
@@ -79,7 +77,6 @@ PandaClean/
 │   ├── test_formatting.py     
 │   └── test_missing.py
 │       
->>>>>>> 96f0fa9 (Complete testing for data cleaning and file handling modules)
 ├── .gitignore
 ├── README.md
 └── requirements.txt

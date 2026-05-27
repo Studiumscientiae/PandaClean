@@ -1,5 +1,7 @@
 # Missing.py file used for handling missing values
 
+import pandas as pd
+
 # =====================
 # Check missing values
 # =====================
@@ -7,9 +9,10 @@
 def check_missing_value(df):
     # checking null values per column and returning them
 
-    missing_df = df.isnull().sum()
-    return missing_df
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError(f"Expected pandas DataFrame, got {type(df)}")
 
+    return df.isnull().sum()
 
 # ==================================
 # Dropping rows with missing values
@@ -18,8 +21,10 @@ def check_missing_value(df):
 def drop_missing_row(df):
     # Remove rows that have missing values
 
-    drop_df = df.dropna()
-    return drop_df
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError(f"Expected pandas DataFrame, got {type(df)}")
+
+    return df.dropna()
 
 
 # =======================================
@@ -29,51 +34,75 @@ def drop_missing_row(df):
 def fill_missing_value(df, value="unknown"):
     # filling missing value with specific value
 
-    specific_df= df.fillna(value)
-    return specific_df
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError(f"Expected pandas DataFrame, got {type(df)}")
 
-# ======================================
+    return df.fillna(value)
+
+# ====================================================================
 # Fill missing numeric values with mean
-# ======================================
+# ====================================================================
 
-def fill_missing_numeric_with_mean(df):
-    # missing numerical values are being replace by mean value
+def fill_missing_numeric_with_mean(df: pd.DataFrame) -> pd.DataFrame:
+    # Fill missing numeric values with column mean
 
-    numeric_df= df.select_dtypes(include=["number"]).columns
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError(f"Expected pandas DataFrame, got {type(df)}")
+    df = df.copy()
 
-    for column in numeric_df:
-        mean_value= df[column].mean()
-        df[column]= df[column].fillna(mean_value)
+    numeric_cols = df.select_dtypes(include=["number"]).columns
+
+    if len(numeric_cols) == 0:
+        raise ValueError("No numeric columns found")
+
+    for col in numeric_cols:
+        if df[col].isnull().any():
+            df[col] = df[col].fillna(df[col].mean())
     return df
 
 
-# ========================================
+# ====================================================================
 # Fill missing numeric values with median
-# ========================================
+# ====================================================================
 
-def fill_missing_numeric_with_median(df):
+def fill_missing_numeric_with_median(df: pd.DataFrame) -> pd.DataFrame:
     # missing numerical values are being replace by median value
 
-    numeric_df= df.select_dtypes(include=["number"]).columns
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError(f"Expected pandas DataFrame, got {type(df)}")
+    df = df.copy()
 
-    for column in numeric_df:
-        median_value= df[column].median()
-        df[column]=df[column].fillna(median_value)
+    numeric_cols = df.select_dtypes(include=["number"]).columns
+
+    if len(numeric_cols) == 0:
+        raise ValueError("No numeric columns found")
+
+    for col in numeric_cols:
+        if df[col].isnull().any():
+            df[col] = df[col].fillna(df[col].median())
     return df
 
-
-# ======================================
+# ====================================================================
 # Fill missing numeric values with mode
-# ======================================
+# ====================================================================
 
-def fill_missing_numeric_with_mode(df):
+def fill_missing_numeric_with_mode(df: pd.DataFrame) -> pd.DataFrame:
     # missing numerical values are being replace by mode value
 
-    numeric_df= df.select_dtypes(include=["number"]).columns
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError(f"Expected pandas DataFrame, got {type(df)}")
+    df = df.copy()
 
-    for column in numeric_df:
-        mode_value= df[column].mode()
-        df[column]= df[column].fillna(mode_value[0])
+    numeric_cols = df.select_dtypes(include=["number"]).columns
+
+    if len(numeric_cols) == 0:
+        raise ValueError("No numeric columns found")
+
+    for col in numeric_cols:
+        if df[col].isnull().any():
+            mode_values = df[col].mode()
+            if not mode_values.empty:
+                df[col] = df[col].fillna(mode_values[0])
     return df
 
 
@@ -84,8 +113,9 @@ def fill_missing_numeric_with_mode(df):
 def drop_empty_column(df):
     # Removes columns where all values are missing
 
-    drop_df= df.dropna(axis=1, how="all")
-    return drop_df
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError(f"Expected pandas DataFrame, got {type(df)}")
+    return df.dropna(axis=1, how="all")
 
 
 # =========================== Missing.py ends here ==============================

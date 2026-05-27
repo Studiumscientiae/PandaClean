@@ -10,16 +10,17 @@ import os
 
 def load_csv(file_path):
 
-    # Loads a CSV file into a dataframe.
+    if not isinstance(file_path, str):
+        raise TypeError("file_path must be a string")
 
-    try:
-        df = pd.read_csv(file_path)
-        print("CSV file loaded successfully.")
-        return df
+    if not is_csv_file(file_path):
+        raise ValueError("File is not a CSV file")
 
-    except Exception as error:
-        print("Error loading CSV file:")
-        print(error)
+    if not file_exists(file_path):
+        raise FileNotFoundError(f"CSV file not found: {file_path}")
+
+    df = pd.read_csv(file_path)
+    return df
 
 
 # ==========================================
@@ -28,16 +29,17 @@ def load_csv(file_path):
 
 def load_excel(file_path):
 
-    # Loads an Excel file into a dataframe.
+    if not isinstance(file_path, str):
+        raise TypeError("file_path must be a string")
 
-    try:
-        df = pd.read_excel(file_path)
-        print("Excel file loaded successfully.")
-        return df
+    if not is_excel_file(file_path):
+        raise ValueError("File is not an Excel file")
 
-    except Exception as error:
-        print("Error loading Excel file:")
-        print(error)
+    if not file_exists(file_path):
+        raise FileNotFoundError(f"Excel file not found: {file_path}")
+
+    df = pd.read_excel(file_path)
+    return df
 
 
 # ==========================================
@@ -46,15 +48,14 @@ def load_excel(file_path):
 
 def save_csv(df, output_path):
 
-    # Saves dataframe as CSV file.
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("df must be a pandas DataFrame")
 
-    try:
-        df.to_csv(output_path, index=False)
-        print("CSV file saved successfully.")
+    if not isinstance(output_path, str):
+        raise TypeError("output_path must be a string")
 
-    except Exception as error:
-        print("Error saving CSV file:")
-        print(error)
+    df.to_csv(output_path, index=False)
+    return True
 
 
 # ==========================================
@@ -63,15 +64,14 @@ def save_csv(df, output_path):
 
 def save_excel(df, output_path):
 
-    # Saves dataframe as Excel file.
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("df must be a pandas DataFrame")
 
-    try:
-        df.to_excel(output_path, index=False)
-        print("Excel file saved successfully.")
+    if not isinstance(output_path, str):
+        raise TypeError("output_path must be a string")
 
-    except Exception as error:
-        print("Error saving Excel file:")
-        print(error)
+    df.to_excel(output_path, index=False)
+    return True
 
 
 # ==========================================
@@ -80,7 +80,8 @@ def save_excel(df, output_path):
 
 def file_exists(file_path):
 
-    # Checks whether file exists.
+    if not isinstance(file_path, str):
+        raise TypeError("file_path must be a string")
 
     return os.path.exists(file_path)
 
@@ -91,7 +92,8 @@ def file_exists(file_path):
 
 def get_file_extension(file_path):
 
-    # Returns file extension.
+    if not isinstance(file_path, str):
+        raise TypeError("file_path must be a string")
 
     return os.path.splitext(file_path)[1]
 
@@ -102,9 +104,10 @@ def get_file_extension(file_path):
 
 def is_csv_file(file_path):
 
-    # Checks whether file is CSV.
+    if not isinstance(file_path, str):
+        raise TypeError("file_path must be a string")
 
-    return file_path.endswith(".csv")
+    return file_path.lower().endswith(".csv")
 
 
 # ==========================================
@@ -113,9 +116,10 @@ def is_csv_file(file_path):
 
 def is_excel_file(file_path):
 
-    # Checks whether file is Excel
+    if not isinstance(file_path, str):
+        raise TypeError("file_path must be a string")
 
-    return file_path.endswith((".xlsx", ".xls"))
+    return file_path.lower().endswith((".xlsx", ".xls"))
 
 
 # ==========================================
@@ -124,16 +128,14 @@ def is_excel_file(file_path):
 
 def file_information(df):
 
-    # Displays basic dataframe information.
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("df must be a pandas DataFrame")
 
-    print("\nShape of DataFrame:")
-    print(df.shape)
-
-    print("\nColumn Names:")
-    print(df.columns)
-
-    print("\nDatatypes:")
-    print(df.dtypes)
+    return {
+        "shape": df.shape,
+        "columns": list(df.columns),
+        "dtypes": df.dtypes.to_dict()
+    }
 
 
 # ==================== File_handler.py ends here ====================

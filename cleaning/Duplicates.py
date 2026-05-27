@@ -1,5 +1,21 @@
 # Duplicates.py file used for handling duplicated values
 
+import pandas as pd
+
+# =====================
+# Common validation
+# =====================
+
+def _validate_df(df):
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError(f"Expected pandas DataFrame, got {type(df)}")
+
+    if df.empty:
+        raise ValueError("DataFrame is empty")
+
+    return df
+
+
 # =====================
 # Check duplicate rows
 # =====================
@@ -7,8 +23,12 @@
 def check_duplicates(df):
     # checking duplicate rows and returning them
 
-    duplicate_rows= df[df.duplicated()]
-    return duplicate_rows
+    try:
+        df = _validate_df(df)
+        return df[df.duplicated()]
+
+    except Exception as e:
+        raise Exception(f"Error in check_duplicates: {str(e)}")
 
 
 # =================
@@ -18,8 +38,12 @@ def check_duplicates(df):
 def count_duplicates(df):
     # Count total duplicate rows
 
-    total_duplicates= df.duplicated().sum()
-    return total_duplicates
+    try:
+        df = _validate_df(df)
+        return df.duplicated().sum()
+
+    except Exception as e:
+        raise Exception(f"Error in count_duplicates: {str(e)}")
 
 
 # ==================
@@ -29,8 +53,12 @@ def count_duplicates(df):
 def remove_duplicates(df):
     # Remove duplicate rows
 
-    drop_df= df.drop_duplicates()
-    return drop_df
+    try:
+        df = _validate_df(df)
+        return df.drop_duplicates()
+
+    except Exception as e:
+        raise Exception(f"Error in remove_duplicates: {str(e)}")
 
 
 # ======================================
@@ -40,8 +68,14 @@ def remove_duplicates(df):
 def remove_duplicates_by_column(df,column_name):
     # remove duplicate rows by specific column
 
-    drop_df= df.drop_duplicates(subset=[column_name])
-    return drop_df
+    try:
+        df = _validate_df(df)
+        if column_name not in df.columns:
+            raise ValueError(f"Column '{column_name}' not found")
+        return df.drop_duplicates(subset=[column_name])
+
+    except Exception as e:
+        raise Exception(f"Error in remove_duplicates_by_column: {str(e)}")
 
 
 # =====================================
@@ -51,8 +85,12 @@ def remove_duplicates_by_column(df,column_name):
 def keep_last_duplicate(df):
     # keeping the last duplicated row instead of first
 
-    drop_df= df.drop_duplicates(keep="last")
-    return drop_df
+    try:
+        df = _validate_df(df)
+        return df.drop_duplicates(keep="last")
+
+    except Exception as e:
+        raise Exception(f"Error in keep_last_duplicate: {str(e)}")
 
 
 # ================
@@ -62,8 +100,14 @@ def keep_last_duplicate(df):
 def mark_duplicates(df):
     # Marking the duplicated values by adding new row with values true/false
 
-    df["is_duplicate"]= df.duplicated()
-    return df
+    try:
+        df = _validate_df(df)
+        df = df.copy()
+        df["is_duplicate"] = df.duplicated()
+        return df
+
+    except Exception as e:
+        raise Exception(f"Error in mark_duplicates: {str(e)}")
 
 
 # =================================================
@@ -73,8 +117,12 @@ def mark_duplicates(df):
 def remove_full_duplicates(df):
     # Remove duplicate rows
 
-    drop_df= df.drop_duplicates(keep="first")
-    return drop_df
+    try:
+        df = _validate_df(df)
+        return df.drop_duplicates(keep="first")
+
+    except Exception as e:
+        raise Exception(f"Error in remove_full_duplicates: {str(e)}")
 
 
 # =========================== Duplicates.py ends here ==============================

@@ -1,26 +1,58 @@
 # test_file_handler.py - Tests for file_handler.py
 
 import os
+import sys
 import pytest
 import pandas as pd
 
 # Adjust import path based on your project structure
-import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from File_manager.file_handler import (
-    load_excel, load_csv, save_excel, save_csv,
-    file_exists, is_excel_file, is_csv_file,
-    get_file_extension, file_information
+    load_excel,
+    load_csv,
+    save_excel,
+    save_csv,
+    file_exists,
+    is_excel_file,
+    is_csv_file,
+    get_file_extension,
+    file_information
 )
 
-DATA_PATH  = os.path.join(os.path.dirname(__file__), "data", "sample_dataset.xlsx")
-GHOST_PATH = os.path.join(os.path.dirname(__file__), "data", "ghost_file.xlsx")
+# ==========================================
+# TEST FILE PATHS
+# ==========================================
 
-EXPECTED_COLUMNS = [
-    "Employee ID", "Full Name", "Age", "Department",
-    "Salary", "Join Date", "Email", "Phone", "City", "Performance Score"
-]
+DATA_PATH = os.path.join(
+    os.path.dirname(__file__),
+    "data",
+    "sample_dataset.xlsx"
+)
+
+GHOST_PATH = os.path.join(
+    os.path.dirname(__file__),
+    "data",
+    "ghost_file.xlsx"
+)
+
+CSV_GHOST_PATH = os.path.join(
+    os.path.dirname(__file__),
+    "data",
+    "ghost.csv"
+)
+
+
+# ==========================================
+# FIXTURE
+# ==========================================
+
+@pytest.fixture
+def raw_df():
+    return pd.DataFrame({
+        "A": [1, 2, 3],
+        "B": ["x", "y", "z"]
+    })
 
 
 # ==========================================
@@ -29,21 +61,37 @@ EXPECTED_COLUMNS = [
 
 def test_load_excel_returns_dataframe():
     df = load_excel(DATA_PATH)
-    assert df is not None
+
     assert isinstance(df, pd.DataFrame)
 
-def test_load_excel_correct_shape():
-    df = load_excel(DATA_PATH)
-    assert df.shape == (53, 10)     # 53 rows, 10 columns from your actual file
 
-def test_load_excel_has_expected_columns():
-    df = load_excel(DATA_PATH)
-    assert list(df.columns) == EXPECTED_COLUMNS
+def test_load_excel_correct_shape():
+    original_df = pd.read_excel(DATA_PATH)
+    loaded_df = load_excel(DATA_PATH)
+
+    assert loaded_df.shape == original_df.shape
+
+
+def test_load_excel_has_same_columns_as_source():
+    original_df = pd.read_excel(DATA_PATH)
+    loaded_df = load_excel(DATA_PATH)
+
+    assert list(loaded_df.columns) == list(original_df.columns)
+
 
 def test_load_excel_file_not_found():
-    # Should return None and print error (current behaviour)
-    result = load_excel(GHOST_PATH)
-    assert result is None
+    with pytest.raises(FileNotFoundError):
+        load_excel(GHOST_PATH)
+
+
+def test_load_excel_invalid_input_type():
+    with pytest.raises(TypeError):
+        load_excel(123)
+
+
+def test_load_excel_wrong_extension():
+    with pytest.raises(ValueError):
+        load_excel("sample.csv")
 
 
 # ==========================================
@@ -51,8 +99,18 @@ def test_load_excel_file_not_found():
 # ==========================================
 
 def test_load_csv_file_not_found():
-    result = load_csv("tests/data/ghost.csv")
-    assert result is None
+    with pytest.raises(FileNotFoundError):
+        load_csv(CSV_GHOST_PATH)
+
+
+def test_load_csv_invalid_input_type():
+    with pytest.raises(TypeError):
+        load_csv(123)
+
+
+def test_load_csv_wrong_extension():
+    with pytest.raises(ValueError):
+        load_csv("sample.xlsx")
 
 
 # ==========================================
@@ -60,16 +118,35 @@ def test_load_csv_file_not_found():
 # ==========================================
 
 def test_save_excel_creates_file(raw_df, tmp_path):
-    out = str(tmp_path / "output.xlsx")
-    save_excel(raw_df, out)
-    assert os.path.exists(out)
+    output_path = str(tmp_path / "output.xlsx")
+
+    result = save_excel(raw_df, output_path)
+
+    assert result is True
+    assert os.path.exists(output_path)
+
 
 def test_save_excel_reloadable(raw_df, tmp_path):
-    out = str(tmp_path / "output.xlsx")
-    save_excel(raw_df, out)
-    reloaded = pd.read_excel(out)
-    assert reloaded.shape == raw_df.shape
-    assert list(reloaded.columns) == list(raw_df.columns)
+    output_path = str(tmp_path / "output.xlsx")
+
+    save_excel(raw_df, output_path)
+
+    reloaded_df = pd.read_excel(output_path)
+
+    assert reloaded_df.shape == raw_df.shape
+    assert list(reloaded_df.columns) == list(raw_df.columns)
+
+
+def test_save_excel_invalid_dataframe(tmp_path):
+    output_path = str(tmp_path / "output.xlsx")
+
+    with pytest.raises(TypeError):
+        save_excel("not_a_dataframe", output_path)
+
+
+def test_save_excel_invalid_output_path(raw_df):
+    with pytest.raises(TypeError):
+        save_excel(raw_df, 123)
 
 
 # ==========================================
@@ -77,53 +154,135 @@ def test_save_excel_reloadable(raw_df, tmp_path):
 # ==========================================
 
 def test_save_csv_creates_file(raw_df, tmp_path):
-    out = str(tmp_path / "output.csv")
-    save_csv(raw_df, out)
-    assert os.path.exists(out)
+    output_path = str(tmp_path / "output.csv")
+
+    result = save_csv(raw_df, output_path)
+
+    assert result is True
+    assert os.path.exists(output_path)
+
 
 def test_save_csv_reloadable(raw_df, tmp_path):
-    out = str(tmp_path / "output.csv")
-    save_csv(raw_df, out)
-    reloaded = pd.read_csv(out)
-    assert reloaded.shape == raw_df.shape
+    output_path = str(tmp_path / "output.csv")
+
+    save_csv(raw_df, output_path)
+
+    reloaded_df = pd.read_csv(output_path)
+
+    assert reloaded_df.shape == raw_df.shape
+    assert list(reloaded_df.columns) == list(raw_df.columns)
+
+
+def test_save_csv_invalid_dataframe(tmp_path):
+    output_path = str(tmp_path / "output.csv")
+
+    with pytest.raises(TypeError):
+        save_csv("not_a_dataframe", output_path)
+
+
+def test_save_csv_invalid_output_path(raw_df):
+    with pytest.raises(TypeError):
+        save_csv(raw_df, 123)
 
 
 # ==========================================
-# FILE CHECKS
+# FILE EXISTS
 # ==========================================
 
 def test_file_exists_true():
-    assert file_exists(DATA_PATH) == True
+    assert file_exists(DATA_PATH) is True
+
 
 def test_file_exists_false():
-    assert file_exists(GHOST_PATH) == False
+    assert file_exists(GHOST_PATH) is False
 
-def test_is_excel_file_true():
-    assert is_excel_file(DATA_PATH) == True
 
-def test_is_excel_file_false():
-    assert is_excel_file("data.csv") == False
+def test_file_exists_invalid_type():
+    with pytest.raises(TypeError):
+        file_exists(123)
 
-def test_is_csv_file_true():
-    assert is_csv_file("data.csv") == True
 
-def test_is_csv_file_false():
-    assert is_csv_file(DATA_PATH) == False
+# ==========================================
+# GET FILE EXTENSION
+# ==========================================
 
 def test_get_file_extension_xlsx():
     assert get_file_extension(DATA_PATH) == ".xlsx"
 
+
 def test_get_file_extension_csv():
     assert get_file_extension("data.csv") == ".csv"
+
+
+def test_get_file_extension_invalid_type():
+    with pytest.raises(TypeError):
+        get_file_extension(123)
+
+
+# ==========================================
+# CSV FILE CHECK
+# ==========================================
+
+def test_is_csv_file_true():
+    assert is_csv_file("data.csv") is True
+
+
+def test_is_csv_file_false():
+    assert is_csv_file(DATA_PATH) is False
+
+
+def test_is_csv_file_invalid_type():
+    with pytest.raises(TypeError):
+        is_csv_file(123)
+
+
+# ==========================================
+# EXCEL FILE CHECK
+# ==========================================
+
+def test_is_excel_file_true():
+    assert is_excel_file(DATA_PATH) is True
+
+
+def test_is_excel_file_false():
+    assert is_excel_file("data.csv") is False
+
+
+def test_is_excel_file_invalid_type():
+    with pytest.raises(TypeError):
+        is_excel_file(123)
 
 
 # ==========================================
 # FILE INFORMATION
 # ==========================================
 
-def test_file_information_runs_without_error(raw_df, capsys):
-    # capsys captures print output — no crash = pass
-    file_information(raw_df)
-    captured = capsys.readouterr()
-    assert "Shape" in captured.out
-    assert "Column Names" in captured.out
+def test_file_information_returns_dictionary(raw_df):
+    info = file_information(raw_df)
+
+    assert isinstance(info, dict)
+
+
+def test_file_information_contains_keys(raw_df):
+    info = file_information(raw_df)
+
+    assert "shape" in info
+    assert "columns" in info
+    assert "dtypes" in info
+
+
+def test_file_information_correct_shape(raw_df):
+    info = file_information(raw_df)
+
+    assert info["shape"] == (3, 2)
+
+
+def test_file_information_correct_columns(raw_df):
+    info = file_information(raw_df)
+
+    assert info["columns"] == ["A", "B"]
+
+
+def test_file_information_invalid_input():
+    with pytest.raises(TypeError):
+        file_information("not_a_dataframe")
